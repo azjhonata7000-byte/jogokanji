@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jogo de Significados · 103 Kanjis N5 · persistente</title>
+<style>
+:root {
+  --bg:#0b1020; --bg2:#141a33; --panel:#121833; --panel2:#1a2141; --text:#eef2ff; --muted:#a8b0d7;
+  --line:rgba(255,255,255,.08); --accent:#8b5cf6; --accent2:#22c55e; --warn:#f59e0b; --bad:#ef4444;
+  --shadow:0 18px 45px rgba(0,0,0,.28); --radius:24px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans JP",sans-serif;color:var(--text);background:
+radial-gradient(circle at top right, rgba(139,92,246,.18), transparent 25%),
+radial-gradient(circle at top left, rgba(34,197,94,.10), transparent 20%),
+linear-gradient(180deg, #090d18, #11172d 40%, #0b1020); min-height:100vh;}
+a{color:#d8b4fe}
+.wrap{width:min(1180px, calc(100% - 24px)); margin:0 auto; padding:18px 0 40px;}
+.hero{display:grid; grid-template-columns:1.25fr .9fr; gap:16px; margin-bottom:16px;}
+.panel{background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025)); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow);}
+.hero-card{padding:22px;}
+h1{margin:0 0 8px; font-size:clamp(30px, 4vw, 46px); line-height:1.02;}
+.subtitle{color:var(--muted); line-height:1.55; font-size:15px; max-width:70ch;}
+.pills{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px;}
+.pill{padding:9px 12px; border-radius:999px; border:1px solid var(--line); background:rgba(255,255,255,.04); font-size:13px;}
+.stats{display:grid; grid-template-columns:repeat(2,1fr); gap:10px; padding:22px;}
+.stat{padding:14px; border-radius:18px; background:rgba(255,255,255,.04); border:1px solid var(--line);}
+.stat b{display:block; font-size:25px; margin-bottom:4px;}
+.stat span{color:var(--muted); font-size:13px;}
+.tabs{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px;}
+.tab{padding:12px 15px; border-radius:14px; border:1px solid var(--line); background:rgba(255,255,255,.04); color:var(--text); font-weight:800; cursor:pointer;}
+.tab.active{background:linear-gradient(180deg, rgba(139,92,246,.35), rgba(139,92,246,.18)); border-color:rgba(216,180,254,.34);}
+.view{display:none} .view.active{display:block}
+.practice{display:grid; grid-template-columns:320px 1fr; gap:16px;}
+.sidebar,.main,.list-panel,.history-panel,.flash-panel{padding:18px;}
+.sidebar{position:sticky; top:12px; align-self:start;}
+h2{margin:0 0 14px; font-size:20px;}
+h3{margin:0 0 8px; font-size:16px;}
+.field{margin-bottom:14px;}
+label{display:block; color:var(--muted); font-size:13px; margin-bottom:7px;}
+select,input[type=search]{width:100%; border:1px solid var(--line); background:#0f1430; color:var(--text); padding:12px; border-radius:12px; font-size:14px;}
+.checkbox{display:flex; align-items:center; gap:10px; border:1px solid var(--line); background:rgba(255,255,255,.03); padding:12px; border-radius:14px;}
+.checkbox input{width:18px; height:18px; accent-color:#8b5cf6;}
+.btnrow{display:flex; flex-wrap:wrap; gap:10px;}
+button{border:1px solid var(--line); background:rgba(255,255,255,.05); color:var(--text); padding:12px 14px; border-radius:14px; font-weight:800; cursor:pointer;}
+button.primary{background:linear-gradient(180deg, rgba(139,92,246,.92), rgba(109,40,217,.92)); border-color:rgba(216,180,254,.34);}
+button.good{background:rgba(34,197,94,.15); border-color:rgba(34,197,94,.33);}
+button.warn{background:rgba(245,158,11,.15); border-color:rgba(245,158,11,.33);}
+button.bad{background:rgba(239,68,68,.16); border-color:rgba(239,68,68,.33);}
+button.ghost{background:transparent}
+button:disabled{opacity:.5; cursor:not-allowed}
+.tip{margin-top:12px; color:var(--muted); line-height:1.55; font-size:13px;}
+.micro{font-size:12px;color:var(--muted);line-height:1.5}
+.topbar{display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin-bottom:14px;}
+.mini{padding:12px; border-radius:16px; border:1px solid var(--line); background:rgba(255,255,255,.03);}
+.mini b{display:block; font-size:22px;}
+.mini span{font-size:12px; color:var(--muted);}
+.stage{min-height:470px; border-radius:24px; border:1px dashed rgba(255,255,255,.12); background:
+radial-gradient(circle at center, rgba(139,92,246,.14), transparent 35%), rgba(255,255,255,.02); display:grid; place-items:center; padding:20px;}
+.question{width:min(580px,100%); text-align:center;}
+.kanji{font-size:clamp(110px,18vw,170px); line-height:1; font-weight:900; margin-bottom:10px; text-shadow:0 10px 24px rgba(0,0,0,.28);}
+.prompt{font-size:19px; margin-bottom:18px;}
+.options{display:grid; gap:10px;}
+.option{text-align:left; padding:14px 16px; border-radius:16px; border:1px solid var(--line); background:rgba(255,255,255,.04); font-size:15px; font-weight:700;}
+.option:hover{transform:translateY(-1px)}
+.option.correct{background:rgba(34,197,94,.17); border-color:rgba(34,197,94,.33);}
+.option.wrong{background:rgba(239,68,68,.16); border-color:rgba(239,68,68,.33);}
+.feedback{margin-top:16px; padding:14px; border-radius:18px; border:1px solid var(--line); background:rgba(255,255,255,.04); text-align:left; display:none;}
+.feedback.show{display:block}
+.feedback .result{font-weight:900; margin-bottom:8px;}
+.feedback .meta{color:var(--muted); line-height:1.55;}
+.progressbar{height:11px; border-radius:999px; background:rgba(255,255,255,.06); overflow:hidden; margin:12px 0 16px; border:1px solid var(--line);}
+.progressbar > div{height:100%; background:linear-gradient(90deg, #8b5cf6, #22c55e); width:0%}
+.summary{display:none; margin-top:14px; padding:16px; border-radius:18px; border:1px solid var(--line); background:rgba(255,255,255,.03);}
+.summary.show{display:block}
+.section-grid{display:grid; grid-template-columns:1fr; gap:16px;}
+.list-toolbar{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px;}
+.list-toolbar input{flex:1 1 250px;}
+.cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:12px;}
+.tile{padding:12px; border:1px solid var(--line); border-radius:18px; background:rgba(255,255,255,.03); display:flex; flex-direction:column; gap:8px; min-height:160px;}
+.tile-head{display:flex; justify-content:space-between; align-items:center; gap:8px;}
+.dot{width:10px; height:10px; border-radius:999px; background:#475569; box-shadow:0 0 0 3px rgba(255,255,255,.04);}
+.dot.good{background:var(--accent2)} .dot.warn{background:var(--warn)} .dot.bad{background:var(--bad)}
+.idx{font-size:12px; color:var(--muted);}
+.tile-kanji{font-size:42px; text-align:center; font-weight:900; margin:8px 0 2px;}
+.tile-meaning{font-size:14px; line-height:1.4; color:#dfe6ff; min-height:40px;}
+.tile small{color:var(--muted)}
+.note{margin-top:14px; color:var(--muted); line-height:1.55; font-size:12px;}
+.table-wrap{overflow:auto; border:1px solid var(--line); border-radius:18px;}
+table{width:100%; border-collapse:collapse;}
+th,td{padding:12px 10px; border-bottom:1px solid var(--line); text-align:left; font-size:14px;}
+th{position:sticky; top:0; background:#121833; z-index:1;}
+.badge{display:inline-block; padding:5px 9px; border-radius:999px; border:1px solid var(--line); font-size:12px;}
+.empty{padding:18px; border:1px dashed var(--line); border-radius:18px; color:var(--muted);}
+.toast{position:fixed; right:16px; bottom:16px; padding:12px 14px; border-radius:14px; background:rgba(12,17,34,.95); border:1px solid var(--line); box-shadow:var(--shadow); opacity:0; transform:translateY(8px); pointer-events:none; transition:.18s ease; max-width:360px;}
+.toast.show{opacity:1; transform:translateY(0)}
+@media (max-width:980px){.hero,.practice{grid-template-columns:1fr} .sidebar{position:static} .topbar{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:620px){.wrap{width:min(100% - 12px,1180px)} .hero-card,.stats,.sidebar,.main,.list-panel,.history-panel,.flash-panel{padding:16px} .cards{grid-template-columns:repeat(2, minmax(0,1fr))} .topbar{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div class="panel hero-card">
+      <h1>Jogo de significados · 103 kanjis N5</h1>
+      <div class="subtitle">Agora com áudio ao revelar, histórico persistente em banco do navegador e retomada de sessão. A ideia é simples: escrever no caderno, depois reforçar o significado de forma leve e repetível.</div>
+      <div class="pills">
+        <div class="pill">103 kanjis</div>
+        <div class="pill">áudio ao revelar</div>
+        <div class="pill">prioriza voz Google no Chrome</div>
+        <div class="pill">treino dos erros corrigido</div>
+        <div class="pill">IndexedDB</div>
+        <div class="pill">retomar sessão</div>
+      </div>
+    </div>
+    <div class="panel stats">
+      <div class="stat"><b id="s-mastered">0</b><span>dominados</span></div>
+      <div class="stat"><b id="s-seen">0</b><span>já revisados</span></div>
+      <div class="stat"><b id="s-errors">0</b><span>com erro acumulado</span></div>
+      <div class="stat"><b id="s-acc">0%</b><span>taxa geral</span></div>
+    </div>
+  </section>
+
+  <div class="tabs">
+    <button class="tab active" data-view="practice">Treino de significado</button>
+    <button class="tab" data-view="flash">Flashcard</button>
+    <button class="tab" data-view="history">Histórico</button>
+    <button class="tab" data-view="list">Lista completa</button>
+  </div>
+
+  <section class="view active" id="view-practice">
+    <div class="practice">
+      <aside class="panel sidebar">
+        <h2>Sessão</h2>
+        <div class="field">
+          <label for="pool">Pool de treino</label>
+          <select id="pool">
+            <option value="all">Todos os 103</option>
+            <option value="errors">Só os erros acumulados</option>
+            <option value="unseen">Só os que você ainda não viu</option>
+            <option value="mastered">Só os dominados</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="size">Quantidade nesta sessão</label>
+          <select id="size">
+            <option>10</option>
+            <option selected>20</option>
+            <option>30</option>
+            <option>50</option>
+            <option value="999">Até acabar o pool</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Áudio</label>
+          <div class="checkbox"><input type="checkbox" id="audioEnabled"><span>Falar o kanji ao revelar</span></div>
+          <div class="note" id="voiceStatus" style="margin-top:8px">Detectando voz japonesa do navegador...</div>
+          <div class="btnrow" style="margin-top:8px"><button class="ghost" id="testVoiceBtn" type="button">Testar voz</button></div>
+        </div>
+        <div class="btnrow">
+          <button class="primary" id="startBtn">Começar sessão</button>
+          <button class="ghost" id="continueBtn" disabled>Continuar sessão anterior</button>
+        </div>
+        <div class="btnrow" style="margin-top:10px">
+          <button class="warn" id="onlyErrorsBtn">Treinar erros acumulados</button>
+          <button class="ghost" id="resetSessionBtn">Resetar sessão</button>
+        </div>
+        <div class="btnrow" style="margin-top:10px">
+          <button class="ghost" id="clearProgressBtn">Apagar progresso</button>
+        </div>
+        <div class="tip">Agora existem dois tipos de revisão de erro: <b>erros acumulados</b> no histórico geral e <b>erros desta sessão</b> no resumo ao final. A sessão em andamento também fica salva para continuar depois.</div>
+      </aside>
+
+      <div class="section-grid">
+        <div class="panel main">
+          <div class="topbar">
+            <div class="mini"><b id="m-progress">0/0</b><span>progresso</span></div>
+            <div class="mini"><b id="m-streak">0</b><span>sequência</span></div>
+            <div class="mini"><b id="m-best">0</b><span>melhor</span></div>
+            <div class="mini"><b id="m-hits">0</b><span>acertos</span></div>
+            <div class="mini"><b id="m-miss">0</b><span>erros</span></div>
+            <div class="mini"><b id="m-left">0</b><span>faltando</span></div>
+          </div>
+          <div class="progressbar"><div id="sessionBar"></div></div>
+          <div class="stage"><div class="question" id="questionBox"><div class="kanji">?</div><div class="prompt">Clique em <b>Começar sessão</b>.</div></div></div>
+          <div class="summary" id="summary"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="view-flash">
+    <div class="panel flash-panel">
+      <h2>Flashcard</h2>
+      <div class="tip" style="margin-top:0;margin-bottom:14px">Use para olhar o kanji, tentar lembrar o significado e só depois revelar. Ao revelar, o jogo tenta emitir o som do kanji com voz japonesa do navegador.</div>
+      <div class="btnrow" style="margin-bottom:14px">
+        <button class="primary" id="flashNext">Sortear kanji</button>
+        <button id="flashReveal">Revelar significado</button>
+        <button id="flashSpeak">Ouvir de novo</button>
+      </div>
+      <div class="stage"><div class="question" id="flashBox"><div class="kanji">?</div><div class="prompt">Clique em <b>Sortear kanji</b> para começar.</div></div></div>
+      <div class="btnrow" style="margin-top:14px">
+        <button class="good" id="flashGood">Acertei</button>
+        <button class="warn" id="flashAlmost">Quase</button>
+        <button class="bad" id="flashBad">Errei</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="view-history">
+    <div class="panel history-panel">
+      <h2>Histórico</h2>
+      <div id="historyWrap"></div>
+    </div>
+  </section>
+
+  <section class="view" id="view-list">
+    <div class="panel list-panel">
+      <h2>Lista completa</h2>
+      <div class="list-toolbar">
+        <input type="search" id="search" placeholder="Buscar por kanji ou significado">
+        <button id="showErrorsBtn">Ver com erro acumulado</button>
+        <button id="showAllBtn">Ver todos</button>
+      </div>
+      <div class="cards" id="cards"></div>
+      <div class="note">O áudio usa a voz japonesa disponível no seu navegador/sistema. Se o navegador não tiver voz japonesa instalada, o botão de áudio pode ficar sem som ou usar uma voz padrão.</div>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const DATA = [{"kanji": "安", "meaning": "barato / tranquilo", "alts": ["seguro", "paz"], "jisho": "https://jisho.org/search/安%20%23kanji"}, {"kanji": "一", "meaning": "um", "alts": ["1"], "jisho": "https://jisho.org/search/一%20%23kanji"}, {"kanji": "飲", "meaning": "beber", "alts": ["tomar (bebida)"], "jisho": "https://jisho.org/search/飲%20%23kanji"}, {"kanji": "右", "meaning": "direita", "alts": [], "jisho": "https://jisho.org/search/右%20%23kanji"}, {"kanji": "雨", "meaning": "chuva", "alts": [], "jisho": "https://jisho.org/search/雨%20%23kanji"}, {"kanji": "駅", "meaning": "estação", "alts": ["estação de trem"], "jisho": "https://jisho.org/search/駅%20%23kanji"}, {"kanji": "円", "meaning": "iene / círculo", "alts": ["círculo", "moeda japonesa"], "jisho": "https://jisho.org/search/円%20%23kanji"}, {"kanji": "火", "meaning": "fogo", "alts": [], "jisho": "https://jisho.org/search/火%20%23kanji"}, {"kanji": "花", "meaning": "flor", "alts": [], "jisho": "https://jisho.org/search/花%20%23kanji"}, {"kanji": "下", "meaning": "baixo / embaixo", "alts": ["descer"], "jisho": "https://jisho.org/search/下%20%23kanji"}, {"kanji": "何", "meaning": "o que", "alts": ["qual"], "jisho": "https://jisho.org/search/何%20%23kanji"}, {"kanji": "会", "meaning": "encontrar / reunião", "alts": ["reunião"], "jisho": "https://jisho.org/search/会%20%23kanji"}, {"kanji": "外", "meaning": "fora / exterior", "alts": ["lado de fora"], "jisho": "https://jisho.org/search/外%20%23kanji"}, {"kanji": "学", "meaning": "estudar / aprender", "alts": ["aprendizado"], "jisho": "https://jisho.org/search/学%20%23kanji"}, {"kanji": "間", "meaning": "intervalo / entre", "alts": ["espaço", "entre"], "jisho": "https://jisho.org/search/間%20%23kanji"}, {"kanji": "気", "meaning": "espírito / energia", "alts": ["humor", "ânimo"], "jisho": "https://jisho.org/search/気%20%23kanji"}, {"kanji": "九", "meaning": "nove", "alts": ["9"], "jisho": "https://jisho.org/search/九%20%23kanji"}, {"kanji": "休", "meaning": "descansar / folga", "alts": ["descanso"], "jisho": "https://jisho.org/search/休%20%23kanji"}, {"kanji": "魚", "meaning": "peixe", "alts": [], "jisho": "https://jisho.org/search/魚%20%23kanji"}, {"kanji": "金", "meaning": "ouro / dinheiro", "alts": ["metal", "sexta (abreviação em dias)"], "jisho": "https://jisho.org/search/金%20%23kanji"}, {"kanji": "空", "meaning": "céu / vazio", "alts": ["vazio"], "jisho": "https://jisho.org/search/空%20%23kanji"}, {"kanji": "月", "meaning": "lua / mês", "alts": ["mês"], "jisho": "https://jisho.org/search/月%20%23kanji"}, {"kanji": "見", "meaning": "ver", "alts": ["olhar"], "jisho": "https://jisho.org/search/見%20%23kanji"}, {"kanji": "言", "meaning": "dizer / falar", "alts": ["falar"], "jisho": "https://jisho.org/search/言%20%23kanji"}, {"kanji": "古", "meaning": "antigo / velho", "alts": ["velho"], "jisho": "https://jisho.org/search/古%20%23kanji"}, {"kanji": "五", "meaning": "cinco", "alts": ["5"], "jisho": "https://jisho.org/search/五%20%23kanji"}, {"kanji": "後", "meaning": "depois / atrás", "alts": ["trás"], "jisho": "https://jisho.org/search/後%20%23kanji"}, {"kanji": "午", "meaning": "meio-dia", "alts": ["noon"], "jisho": "https://jisho.org/search/午%20%23kanji"}, {"kanji": "語", "meaning": "língua / palavra", "alts": ["idioma"], "jisho": "https://jisho.org/search/語%20%23kanji"}, {"kanji": "校", "meaning": "escola", "alts": ["prédio escolar"], "jisho": "https://jisho.org/search/校%20%23kanji"}, {"kanji": "口", "meaning": "boca", "alts": [], "jisho": "https://jisho.org/search/口%20%23kanji"}, {"kanji": "行", "meaning": "ir / ir para", "alts": ["seguir"], "jisho": "https://jisho.org/search/行%20%23kanji"}, {"kanji": "高", "meaning": "alto / caro", "alts": ["elevado"], "jisho": "https://jisho.org/search/高%20%23kanji"}, {"kanji": "国", "meaning": "país", "alts": ["nação"], "jisho": "https://jisho.org/search/国%20%23kanji"}, {"kanji": "今", "meaning": "agora", "alts": ["neste momento"], "jisho": "https://jisho.org/search/今%20%23kanji"}, {"kanji": "左", "meaning": "esquerda", "alts": [], "jisho": "https://jisho.org/search/左%20%23kanji"}, {"kanji": "三", "meaning": "três", "alts": ["3"], "jisho": "https://jisho.org/search/三%20%23kanji"}, {"kanji": "山", "meaning": "montanha", "alts": [], "jisho": "https://jisho.org/search/山%20%23kanji"}, {"kanji": "四", "meaning": "quatro", "alts": ["4"], "jisho": "https://jisho.org/search/四%20%23kanji"}, {"kanji": "子", "meaning": "criança / filho", "alts": ["filho"], "jisho": "https://jisho.org/search/子%20%23kanji"}, {"kanji": "耳", "meaning": "orelha / ouvido", "alts": ["ouvido"], "jisho": "https://jisho.org/search/耳%20%23kanji"}, {"kanji": "時", "meaning": "hora / tempo", "alts": ["tempo"], "jisho": "https://jisho.org/search/時%20%23kanji"}, {"kanji": "七", "meaning": "sete", "alts": ["7"], "jisho": "https://jisho.org/search/七%20%23kanji"}, {"kanji": "車", "meaning": "carro / veículo", "alts": ["veículo"], "jisho": "https://jisho.org/search/車%20%23kanji"}, {"kanji": "社", "meaning": "empresa / santuário", "alts": ["companhia", "santuário xintoísta"], "jisho": "https://jisho.org/search/社%20%23kanji"}, {"kanji": "手", "meaning": "mão", "alts": [], "jisho": "https://jisho.org/search/手%20%23kanji"}, {"kanji": "週", "meaning": "semana", "alts": [], "jisho": "https://jisho.org/search/週%20%23kanji"}, {"kanji": "十", "meaning": "dez", "alts": ["10"], "jisho": "https://jisho.org/search/十%20%23kanji"}, {"kanji": "出", "meaning": "sair / aparecer", "alts": ["sair"], "jisho": "https://jisho.org/search/出%20%23kanji"}, {"kanji": "書", "meaning": "escrever", "alts": [], "jisho": "https://jisho.org/search/書%20%23kanji"}, {"kanji": "女", "meaning": "mulher", "alts": ["feminino"], "jisho": "https://jisho.org/search/女%20%23kanji"}, {"kanji": "小", "meaning": "pequeno", "alts": [], "jisho": "https://jisho.org/search/小%20%23kanji"}, {"kanji": "少", "meaning": "pouco / poucos", "alts": ["poucos"], "jisho": "https://jisho.org/search/少%20%23kanji"}, {"kanji": "上", "meaning": "cima / em cima", "alts": ["subir"], "jisho": "https://jisho.org/search/上%20%23kanji"}, {"kanji": "食", "meaning": "comer / alimento", "alts": ["refeição"], "jisho": "https://jisho.org/search/食%20%23kanji"}, {"kanji": "新", "meaning": "novo", "alts": [], "jisho": "https://jisho.org/search/新%20%23kanji"}, {"kanji": "人", "meaning": "pessoa", "alts": ["gente"], "jisho": "https://jisho.org/search/人%20%23kanji"}, {"kanji": "水", "meaning": "água", "alts": [], "jisho": "https://jisho.org/search/水%20%23kanji"}, {"kanji": "生", "meaning": "vida / nascer", "alts": ["viver", "cru"], "jisho": "https://jisho.org/search/生%20%23kanji"}, {"kanji": "西", "meaning": "oeste", "alts": [], "jisho": "https://jisho.org/search/西%20%23kanji"}, {"kanji": "川", "meaning": "rio", "alts": [], "jisho": "https://jisho.org/search/川%20%23kanji"}, {"kanji": "千", "meaning": "mil", "alts": ["1000"], "jisho": "https://jisho.org/search/千%20%23kanji"}, {"kanji": "先", "meaning": "antes / ponta", "alts": ["primeiro", "adiante"], "jisho": "https://jisho.org/search/先%20%23kanji"}, {"kanji": "前", "meaning": "antes / frente", "alts": ["frente"], "jisho": "https://jisho.org/search/前%20%23kanji"}, {"kanji": "足", "meaning": "pé / perna", "alts": ["suficiente"], "jisho": "https://jisho.org/search/足%20%23kanji"}, {"kanji": "多", "meaning": "muito / muitos", "alts": ["numeroso"], "jisho": "https://jisho.org/search/多%20%23kanji"}, {"kanji": "大", "meaning": "grande", "alts": [], "jisho": "https://jisho.org/search/大%20%23kanji"}, {"kanji": "男", "meaning": "homem", "alts": ["masculino"], "jisho": "https://jisho.org/search/男%20%23kanji"}, {"kanji": "中", "meaning": "meio / dentro", "alts": ["interior"], "jisho": "https://jisho.org/search/中%20%23kanji"}, {"kanji": "長", "meaning": "longo / chefe", "alts": ["comprido", "líder"], "jisho": "https://jisho.org/search/長%20%23kanji"}, {"kanji": "天", "meaning": "céu", "alts": ["paraíso"], "jisho": "https://jisho.org/search/天%20%23kanji"}, {"kanji": "店", "meaning": "loja", "alts": ["estabelecimento"], "jisho": "https://jisho.org/search/店%20%23kanji"}, {"kanji": "電", "meaning": "eletricidade", "alts": ["elétrico"], "jisho": "https://jisho.org/search/電%20%23kanji"}, {"kanji": "土", "meaning": "terra / solo", "alts": ["chão"], "jisho": "https://jisho.org/search/土%20%23kanji"}, {"kanji": "東", "meaning": "leste", "alts": [], "jisho": "https://jisho.org/search/東%20%23kanji"}, {"kanji": "道", "meaning": "caminho / estrada", "alts": ["estrada"], "jisho": "https://jisho.org/search/道%20%23kanji"}, {"kanji": "読", "meaning": "ler", "alts": [], "jisho": "https://jisho.org/search/読%20%23kanji"}, {"kanji": "南", "meaning": "sul", "alts": [], "jisho": "https://jisho.org/search/南%20%23kanji"}, {"kanji": "二", "meaning": "dois", "alts": ["2"], "jisho": "https://jisho.org/search/二%20%23kanji"}, {"kanji": "日", "meaning": "dia / sol", "alts": ["sol"], "jisho": "https://jisho.org/search/日%20%23kanji"}, {"kanji": "入", "meaning": "entrar", "alts": ["colocar"], "jisho": "https://jisho.org/search/入%20%23kanji"}, {"kanji": "年", "meaning": "ano", "alts": [], "jisho": "https://jisho.org/search/年%20%23kanji"}, {"kanji": "買", "meaning": "comprar", "alts": [], "jisho": "https://jisho.org/search/買%20%23kanji"}, {"kanji": "白", "meaning": "branco", "alts": [], "jisho": "https://jisho.org/search/白%20%23kanji"}, {"kanji": "八", "meaning": "oito", "alts": ["8"], "jisho": "https://jisho.org/search/八%20%23kanji"}, {"kanji": "半", "meaning": "metade", "alts": ["meio"], "jisho": "https://jisho.org/search/半%20%23kanji"}, {"kanji": "百", "meaning": "cem", "alts": ["100"], "jisho": "https://jisho.org/search/百%20%23kanji"}, {"kanji": "父", "meaning": "pai", "alts": [], "jisho": "https://jisho.org/search/父%20%23kanji"}, {"kanji": "分", "meaning": "parte / minuto", "alts": ["entender", "separar"], "jisho": "https://jisho.org/search/分%20%23kanji"}, {"kanji": "聞", "meaning": "ouvir / perguntar", "alts": ["escutar"], "jisho": "https://jisho.org/search/聞%20%23kanji"}, {"kanji": "母", "meaning": "mãe", "alts": [], "jisho": "https://jisho.org/search/母%20%23kanji"}, {"kanji": "北", "meaning": "norte", "alts": [], "jisho": "https://jisho.org/search/北%20%23kanji"}, {"kanji": "木", "meaning": "árvore / madeira", "alts": ["madeira"], "jisho": "https://jisho.org/search/木%20%23kanji"}, {"kanji": "本", "meaning": "livro / origem", "alts": ["principal", "base"], "jisho": "https://jisho.org/search/本%20%23kanji"}, {"kanji": "毎", "meaning": "cada / todo", "alts": ["todo"], "jisho": "https://jisho.org/search/毎%20%23kanji"}, {"kanji": "万", "meaning": "dez mil", "alts": ["10000"], "jisho": "https://jisho.org/search/万%20%23kanji"}, {"kanji": "名", "meaning": "nome / fama", "alts": ["nome"], "jisho": "https://jisho.org/search/名%20%23kanji"}, {"kanji": "目", "meaning": "olho", "alts": [], "jisho": "https://jisho.org/search/目%20%23kanji"}, {"kanji": "友", "meaning": "amigo", "alts": [], "jisho": "https://jisho.org/search/友%20%23kanji"}, {"kanji": "来", "meaning": "vir", "alts": [], "jisho": "https://jisho.org/search/来%20%23kanji"}, {"kanji": "立", "meaning": "levantar / ficar de pé", "alts": ["erguer"], "jisho": "https://jisho.org/search/立%20%23kanji"}, {"kanji": "六", "meaning": "seis", "alts": ["6"], "jisho": "https://jisho.org/search/六%20%23kanji"}, {"kanji": "話", "meaning": "falar / conversa", "alts": ["história", "conversa"], "jisho": "https://jisho.org/search/話%20%23kanji"}];
+const ITEM_BY_KANJI = Object.fromEntries(DATA.map(item => [item.kanji, item]));
+const DB_NAME = 'kanji-n5-meaning-db';
+const STORE_NAME = 'app';
+const FALLBACK_KEY = 'kanji-n5-meaning-fallback-v2';
+const STATE_KEY = 'state';
+const ACTIVE_SESSION_KEY = 'activeSession';
+const DEFAULT_STATE = {
+  version: 2,
+  progress: {},
+  bestStreak: 0,
+  settings: { audioEnabled: true },
+  history: []
+};
+
+let db = null;
+let dbReady = null;
+let state = structuredClone(DEFAULT_STATE);
+let session = null;
+let flashCurrent = null;
+let voiceCache = [];
+let selectedVoice = null;
+let activeSessionSnapshot = null;
+
+function structuredClone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function openDB() {
+  return new Promise((resolve) => {
+    if (!('indexedDB' in window)) return resolve(null);
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = () => {
+      const d = req.result;
+      if (!d.objectStoreNames.contains(STORE_NAME)) d.createObjectStore(STORE_NAME);
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => resolve(null);
+  });
+}
+
+async function dbGet(key) {
+  if (!db) return getFallback()[key] ?? null;
+  return new Promise((resolve) => {
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const req = tx.objectStore(STORE_NAME).get(key);
+    req.onsuccess = () => resolve(req.result ?? null);
+    req.onerror = () => resolve(null);
+  });
+}
+
+async function dbSet(key, value) {
+  if (!db) {
+    const fallback = getFallback();
+    fallback[key] = value;
+    localStorage.setItem(FALLBACK_KEY, JSON.stringify(fallback));
+    return;
+  }
+  return new Promise((resolve) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    tx.objectStore(STORE_NAME).put(value, key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => resolve();
+  });
+}
+
+async function dbDelete(key) {
+  if (!db) {
+    const fallback = getFallback();
+    delete fallback[key];
+    localStorage.setItem(FALLBACK_KEY, JSON.stringify(fallback));
+    return;
+  }
+  return new Promise((resolve) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    tx.objectStore(STORE_NAME).delete(key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => resolve();
+  });
+}
+
+function getFallback() {
+  try { return JSON.parse(localStorage.getItem(FALLBACK_KEY) || '{}'); }
+  catch { return {}; }
+}
+
+async function persistState() {
+  await dbSet(STATE_KEY, state);
+}
+
+async function persistSession() {
+  const snapshot = serializeSession();
+  activeSessionSnapshot = snapshot;
+  if (snapshot) await dbSet(ACTIVE_SESSION_KEY, snapshot);
+  else await dbDelete(ACTIVE_SESSION_KEY);
+  renderContinueButton();
+}
+
+function statFor(kanji) {
+  if (!state.progress[kanji]) state.progress[kanji] = { seen:0, right:0, wrong:0, almost:0 };
+  return state.progress[kanji];
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function sample(arr, n) {
+  return shuffle(arr).slice(0, n);
+}
+
+function unique(arr) {
+  return [...new Set(arr)];
+}
+
+function masteryClass(item) {
+  const s = statFor(item.kanji);
+  if (s.right >= 3 && s.wrong === 0 && s.almost === 0) return 'good';
+  if (s.wrong > 0) return 'bad';
+  if (s.almost > 0 || s.seen > 0) return 'warn';
+  return '';
+}
+
+function errorItems() {
+  return DATA.filter(item => statFor(item.kanji).wrong > 0);
+}
+
+function pickPool(kind) {
+  if (kind === 'errors') return errorItems();
+  if (kind === 'unseen') return DATA.filter(item => statFor(item.kanji).seen === 0);
+  if (kind === 'mastered') return DATA.filter(item => masteryClass(item) === 'good');
+  return DATA;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+function updateAudioSetting() {
+  state.settings.audioEnabled = document.getElementById('audioEnabled').checked;
+  persistState();
+}
+
+function loadVoices() {
+  if (!('speechSynthesis' in window)) return [];
+  voiceCache = window.speechSynthesis.getVoices() || [];
+  return voiceCache;
+}
+
+function chooseJapaneseVoice() {
+  const voices = loadVoices();
+  const isJa = v => /^ja/i.test(v.lang || '') || /JP/i.test(v.lang || '') || /japan/i.test(v.name || '');
+  const candidates = voices.filter(isJa);
+  const google = candidates.find(v => /google/i.test(v.name || '') && isJa(v));
+  const chrome = candidates.find(v => /chrome|microsoft|apple/i.test(v.name || ''));
+  return google || chrome || candidates[0] || null;
+}
+
+function updateVoiceStatus() {
+  const el = document.getElementById('voiceStatus');
+  if (!el) return;
+  if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') {
+    selectedVoice = null;
+    el.textContent = 'Seu navegador não oferece voz por síntese aqui.';
+    return;
+  }
+  selectedVoice = chooseJapaneseVoice();
+  if (!selectedVoice) {
+    el.textContent = 'Nenhuma voz japonesa detectada. No Chrome, tente abrir este arquivo e aguardar alguns segundos.';
+    return;
+  }
+  const googleLike = /google/i.test(selectedVoice.name || '');
+  el.textContent = googleLike
+    ? `Voz detectada: ${selectedVoice.name} (${selectedVoice.lang})`
+    : `Voz detectada: ${selectedVoice.name} (${selectedVoice.lang}). Se houver voz Google em japonês no Chrome, ela será priorizada.`;
+}
+
+function speakText(textToSpeak, force = false) {
+  if (!textToSpeak || (!state.settings.audioEnabled && !force)) return;
+  if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') {
+    showToast('Seu navegador não suporta áudio por voz aqui.');
+    return;
+  }
+  try {
+    selectedVoice = chooseJapaneseVoice();
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(textToSpeak);
+    utter.lang = 'ja-JP';
+    utter.rate = 0.82;
+    utter.pitch = 1;
+    if (selectedVoice) utter.voice = selectedVoice;
+    window.speechSynthesis.speak(utter);
+  } catch (err) {
+    showToast('Não consegui tocar o áudio deste kanji.');
+  }
+}
+
+function speakKanji(item, force = false) {
+  if (!item) return;
+  speakText(item.kanji, force);
+}
+
+function renderStats() {
+  const allStats = DATA.map(item => statFor(item.kanji));
+  const mastered = DATA.filter(item => masteryClass(item) === 'good').length;
+  const seen = allStats.filter(s => s.seen > 0).length;
+  const errors = allStats.filter(s => s.wrong > 0).length;
+  const right = allStats.reduce((sum, s) => sum + s.right, 0);
+  const seenTotal = allStats.reduce((sum, s) => sum + s.seen, 0);
+  document.getElementById('s-mastered').textContent = mastered;
+  document.getElementById('s-seen').textContent = seen;
+  document.getElementById('s-errors').textContent = errors;
+  document.getElementById('s-acc').textContent = seenTotal ? Math.round((right / seenTotal) * 100) + '%' : '0%';
+}
+
+function renderList() {
+  const q = (document.getElementById('search')?.value || '').trim().toLowerCase();
+  const onlyErrors = !!renderList.onlyErrors;
+  let items = DATA.filter(item => !q || item.kanji.includes(q) || item.meaning.toLowerCase().includes(q) || item.alts.join(' ').toLowerCase().includes(q));
+  if (onlyErrors) items = items.filter(item => statFor(item.kanji).wrong > 0);
+  const wrap = document.getElementById('cards');
+  if (!items.length) {
+    wrap.innerHTML = `<div class="empty">Nenhum kanji encontrado nesse filtro.</div>`;
+    return;
+  }
+  wrap.innerHTML = items.map((item, idx) => {
+    const s = statFor(item.kanji);
+    const cls = masteryClass(item);
+    return `<div class="tile">
+      <div class="tile-head"><span class="idx">#${idx+1}</span><span class="dot ${cls}"></span></div>
+      <div class="tile-kanji">${item.kanji}</div>
+      <div class="tile-meaning">${item.meaning}</div>
+      <small>Visto: ${s.seen} · Acertos: ${s.right} · Quases: ${s.almost} · Erros: ${s.wrong}</small>
+      <div class="btnrow" style="margin-top:auto">
+        <button onclick="window.open('${item.jisho}','_blank')">Jisho</button>
+        <button onclick="window.__speakFromList('${item.kanji}')">Ouvir</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderHistory() {
+  const wrap = document.getElementById('historyWrap');
+  const history = state.history || [];
+  if (!history.length) {
+    wrap.innerHTML = `<div class="empty">Nenhuma sessão salva ainda. Assim que você concluir uma sessão, ela vai aparecer aqui.</div>`;
+    return;
+  }
+  wrap.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Quando</th>
+            <th>Modo</th>
+            <th>Total</th>
+            <th>Acertos</th>
+            <th>Erros</th>
+            <th>Precisão</th>
+            <th>Melhor sequência</th>
+            <th>Erros da sessão</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${history.map(h => `
+            <tr>
+              <td>${new Date(h.finishedAt).toLocaleString('pt-BR')}</td>
+              <td><span class="badge">${h.label}</span></td>
+              <td>${h.total}</td>
+              <td>${h.right}</td>
+              <td>${h.wrong}</td>
+              <td>${h.accuracy}%</td>
+              <td>${h.best}</td>
+              <td>${h.mistakes.length ? h.mistakes.join('、') : '—'}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="note">O histórico e o progresso ficam gravados no banco do navegador. Ao abrir o HTML de novo no mesmo navegador, seus dados continuam ali.</div>
+  `;
+}
+
+function setTabs() {
+  document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + btn.dataset.view).classList.add('active');
+  }));
+}
+
+function buildChoices(correctItem) {
+  const wrongMeanings = unique(shuffle(DATA.filter(x => x.kanji !== correctItem.kanji).map(x => x.meaning))).slice(0, 3);
+  return shuffle([correctItem.meaning, ...wrongMeanings]);
+}
+
+function poolLabel(kind) {
+  return { all:'Todos os 103', errors:'Erros acumulados', unseen:'Ainda não vistos', mastered:'Dominados', custom:'Erros desta sessão' }[kind] || 'Sessão';
+}
+
+function startSession(kind = null, customKanjis = null) {
+  const poolKind = customKanjis ? 'custom' : (kind || document.getElementById('pool').value);
+  let pool = customKanjis ? unique(customKanjis).map(k => ITEM_BY_KANJI[k]).filter(Boolean) : pickPool(poolKind);
+  if (!pool.length) {
+    showToast('Esse pool está vazio.');
+    return;
+  }
+  const size = parseInt(document.getElementById('size').value, 10);
+  if (!customKanjis) {
+    if (size !== 999) pool = sample(pool, Math.min(size, pool.length));
+    else pool = shuffle(pool);
+  } else {
+    pool = shuffle(pool);
+  }
+  session = {
+    poolKind,
+    label: poolLabel(poolKind),
+    items: pool.map(item => item.kanji),
+    index: 0,
+    right: 0,
+    wrong: 0,
+    streak: 0,
+    best: 0,
+    answered: false,
+    currentKanji: null,
+    currentChoices: [],
+    mistakes: [],
+    lastChoiceIndex: null,
+    lastCorrect: null,
+    startedAt: Date.now()
+  };
+  document.getElementById('summary').classList.remove('show');
+  nextQuestion();
+}
+
+function serializeSession() {
+  if (!session) return null;
+  return { ...session };
+}
+
+function restoreSession(snapshot) {
+  if (!snapshot || !snapshot.items?.length) return false;
+  session = { ...snapshot };
+  if (session.index >= session.items.length) return false;
+  renderQuestion();
+  if (session.answered) restoreAnsweredState();
+  updateSessionBar();
+  document.getElementById('summary').classList.remove('show');
+  showToast('Sessão anterior restaurada.');
+  return true;
+}
+
+function renderContinueButton() {
+  const btn = document.getElementById('continueBtn');
+  const can = !!(activeSessionSnapshot && activeSessionSnapshot.items?.length && activeSessionSnapshot.index < activeSessionSnapshot.items.length);
+  btn.disabled = !can;
+}
+
+function currentItem() {
+  return session ? ITEM_BY_KANJI[session.currentKanji] : null;
+}
+
+function nextQuestion() {
+  if (!session) return;
+  if (session.index >= session.items.length) {
+    finishSession();
+    return;
+  }
+  session.answered = false;
+  session.lastChoiceIndex = null;
+  session.lastCorrect = null;
+  const item = ITEM_BY_KANJI[session.items[session.index]];
+  session.currentKanji = item.kanji;
+  session.currentChoices = buildChoices(item);
+  renderQuestion();
+  updateSessionBar();
+  persistSession();
+}
+
+function renderQuestion() {
+  const q = document.getElementById('questionBox');
+  if (!session || !session.currentKanji) {
+    q.innerHTML = `<div class="kanji">?</div><div class="prompt">Clique em <b>Começar sessão</b> para iniciar.</div>`;
+    return;
+  }
+  const item = currentItem();
+  q.innerHTML = `
+    <div class="kanji">${item.kanji}</div>
+    <div class="prompt">Qual é o significado mais básico desse kanji?</div>
+    <div class="options">
+      ${session.currentChoices.map((choice, i) => `<button class="option" data-index="${i}"><span style="opacity:.7;margin-right:8px">${i+1}.</span>${choice}</button>`).join('')}
+    </div>
+    <div class="feedback" id="feedback"></div>
+  `;
+  q.querySelectorAll('.option').forEach(btn => btn.addEventListener('click', () => answer(parseInt(btn.dataset.index, 10))));
+}
+
+function answer(choiceIndex) {
+  if (!session || session.answered) return;
+  session.answered = true;
+  session.lastChoiceIndex = choiceIndex;
+  const item = currentItem();
+  const picked = session.currentChoices[choiceIndex];
+  const correct = picked === item.meaning;
+  session.lastCorrect = correct;
+  const opts = [...document.querySelectorAll('.option')];
+  opts.forEach(btn => {
+    const isCorrect = session.currentChoices[parseInt(btn.dataset.index, 10)] === item.meaning;
+    if (isCorrect) btn.classList.add('correct');
+  });
+  if (!correct && opts[choiceIndex]) opts[choiceIndex].classList.add('wrong');
+
+  const s = statFor(item.kanji);
+  s.seen += 1;
+  if (correct) {
+    s.right += 1;
+    session.right += 1;
+    session.streak += 1;
+    session.best = Math.max(session.best, session.streak);
+    state.bestStreak = Math.max(state.bestStreak || 0, session.best);
+  } else {
+    s.wrong += 1;
+    session.wrong += 1;
+    session.streak = 0;
+    session.mistakes.push(item.kanji);
+  }
+  persistState();
+  persistSession();
+  renderStats();
+  renderList();
+  renderHistory();
+
+  renderAnsweredFeedback();
+  speakKanji(item);
+  updateSessionBar();
+}
+
+function renderAnsweredFeedback() {
+  const item = currentItem();
+  if (!item) return;
+  const correct = !!session.lastCorrect;
+  const opts = [...document.querySelectorAll('.option')];
+  opts.forEach(btn => {
+    btn.disabled = true;
+    const isCorrect = session.currentChoices[parseInt(btn.dataset.index, 10)] === item.meaning;
+    if (isCorrect) btn.classList.add('correct');
+  });
+  if (!correct && opts[session.lastChoiceIndex]) opts[session.lastChoiceIndex].classList.add('wrong');
+  const fb = document.getElementById('feedback');
+  fb.classList.add('show');
+  fb.innerHTML = `
+    <div class="result">${correct ? 'Acertou.' : 'Errou.'}</div>
+    <div class="meta">
+      <b>${item.kanji}</b> = <b>${item.meaning}</b>${item.alts.length ? ' · também pode aparecer como: ' + item.alts.join(', ') : ''}.<br>
+      <a href="${item.jisho}" target="_blank">Abrir no Jisho</a>
+    </div>
+    <div class="btnrow" style="margin-top:12px">
+      <button id="speakRevealBtn">Ouvir kanji</button>
+      <button class="primary" id="nextBtn">Próxima</button>
+    </div>
+  `;
+  document.getElementById('speakRevealBtn').onclick = () => speakKanji(item);
+  document.getElementById('nextBtn').onclick = () => { session.index += 1; nextQuestion(); };
+}
+
+function restoreAnsweredState() {
+  renderAnsweredFeedback();
+}
+
+function updateSessionBar() {
+  if (!session) return;
+  const completed = Math.min(session.index + (session.answered ? 1 : 0), session.items.length);
+  document.getElementById('m-progress').textContent = `${completed}/${session.items.length}`;
+  document.getElementById('m-streak').textContent = session.streak;
+  document.getElementById('m-best').textContent = Math.max(session.best, state.bestStreak || 0);
+  document.getElementById('m-hits').textContent = session.right;
+  document.getElementById('m-miss').textContent = session.wrong;
+  document.getElementById('m-left').textContent = Math.max(session.items.length - completed, 0);
+  const pct = session.items.length ? (completed / session.items.length) * 100 : 0;
+  document.getElementById('sessionBar').style.width = pct + '%';
+}
+
+function finishSession() {
+  const box = document.getElementById('questionBox');
+  box.innerHTML = `<div class="kanji">✓</div><div class="prompt">Sessão concluída.</div>`;
+  const total = session.items.length;
+  const accuracy = total ? Math.round((session.right / total) * 100) : 0;
+  const mistakes = unique(session.mistakes);
+  state.history = [{
+    finishedAt: Date.now(),
+    label: session.label,
+    total,
+    right: session.right,
+    wrong: session.wrong,
+    accuracy,
+    best: session.best,
+    mistakes
+  }, ...(state.history || [])].slice(0, 60);
+  persistState();
+  const summary = document.getElementById('summary');
+  summary.classList.add('show');
+  summary.innerHTML = `
+    <h2 style="margin-top:0">Resumo da sessão</h2>
+    <div class="btnrow" style="margin-bottom:12px">
+      <button class="good">Acertos: ${session.right}</button>
+      <button class="bad">Erros: ${session.wrong}</button>
+      <button>Precisão: ${accuracy}%</button>
+      <button>Melhor sequência: ${session.best}</button>
+    </div>
+    ${mistakes.length ? `<p style="line-height:1.55">Você errou estes kanjis nesta sessão: <b>${mistakes.join('、')}</b></p>` : '<p>Perfeito. Você não errou nenhum nesta sessão.</p>'}
+    <div class="btnrow">
+      <button class="primary" id="againBtn">Nova sessão</button>
+      <button class="warn" id="sessionMistakesBtn" ${mistakes.length ? '' : 'disabled'}>Treinar erros desta sessão</button>
+      <button id="historyErrorsBtn">Treinar erros acumulados</button>
+    </div>
+  `;
+  document.getElementById('againBtn').onclick = () => startSession();
+  document.getElementById('historyErrorsBtn').onclick = () => startSession('errors');
+  const mb = document.getElementById('sessionMistakesBtn');
+  if (mb) mb.onclick = () => startSession(null, mistakes);
+  session = null;
+  activeSessionSnapshot = null;
+  persistSession();
+  renderStats();
+  renderList();
+  renderHistory();
+  updateSessionBarFinished();
+}
+
+function updateSessionBarFinished() {
+  document.getElementById('m-progress').textContent = '0/0';
+  document.getElementById('m-streak').textContent = '0';
+  document.getElementById('m-best').textContent = state.bestStreak || 0;
+  document.getElementById('m-hits').textContent = '0';
+  document.getElementById('m-miss').textContent = '0';
+  document.getElementById('m-left').textContent = '0';
+  document.getElementById('sessionBar').style.width = '0%';
+}
+
+function resetSessionOnly(showMsg = true) {
+  session = null;
+  document.getElementById('summary').classList.remove('show');
+  document.getElementById('questionBox').innerHTML = `<div class="kanji">?</div><div class="prompt">Sessão resetada. Clique em <b>Começar sessão</b>.</div>`;
+  updateSessionBarFinished();
+  activeSessionSnapshot = null;
+  persistSession();
+  if (showMsg) showToast('Sessão resetada.');
+}
+
+function flashPick() {
+  const pool = pickPool(document.getElementById('pool').value);
+  if (!pool.length) {
+    showToast('Esse pool está vazio.');
+    return;
+  }
+  flashCurrent = pool[Math.floor(Math.random() * pool.length)];
+  document.getElementById('flashBox').innerHTML = `<div class="kanji">${flashCurrent.kanji}</div><div class="prompt">Tente lembrar o significado. Depois clique em <b>Revelar significado</b>.</div>`;
+}
+
+function flashReveal() {
+  if (!flashCurrent) return;
+  document.getElementById('flashBox').innerHTML = `
+    <div class="kanji">${flashCurrent.kanji}</div>
+    <div class="prompt"><b>${flashCurrent.meaning}</b>${flashCurrent.alts.length ? '<br><span style="color:var(--muted);font-size:15px">Também: ' + flashCurrent.alts.join(', ') + '</span>' : ''}<br><a href="${flashCurrent.jisho}" target="_blank">Abrir no Jisho</a></div>
+  `;
+  speakKanji(flashCurrent);
+}
+
+function markFlash(kind) {
+  if (!flashCurrent) return;
+  const s = statFor(flashCurrent.kanji);
+  s.seen += 1;
+  if (kind === 'good') s.right += 1;
+  else if (kind === 'almost') s.almost += 1;
+  else s.wrong += 1;
+  persistState();
+  renderStats();
+  renderList();
+  renderHistory();
+  showToast(kind === 'good' ? 'Marcado como acerto.' : kind === 'almost' ? 'Marcado como quase.' : 'Marcado como erro.');
+  flashPick();
+}
+
+function bind() {
+  setTabs();
+  document.getElementById('startBtn').onclick = () => startSession();
+  document.getElementById('continueBtn').onclick = () => { if (activeSessionSnapshot) restoreSession(activeSessionSnapshot); };
+  document.getElementById('onlyErrorsBtn').onclick = () => startSession('errors');
+  document.getElementById('resetSessionBtn').onclick = () => resetSessionOnly();
+  document.getElementById('clearProgressBtn').onclick = async () => {
+    if (!confirm('Apagar todo o progresso, o histórico e a sessão salva?')) return;
+    state = structuredClone(DEFAULT_STATE);
+    document.getElementById('audioEnabled').checked = state.settings.audioEnabled;
+    flashCurrent = null;
+    await persistState();
+    await dbDelete(ACTIVE_SESSION_KEY);
+    activeSessionSnapshot = null;
+    resetSessionOnly(false);
+    document.getElementById('flashBox').innerHTML = `<div class="kanji">?</div><div class="prompt">Progresso apagado.</div>`;
+    renderStats();
+    renderList();
+    renderHistory();
+    renderContinueButton();
+    showToast('Progresso zerado.');
+  };
+  document.getElementById('search').addEventListener('input', renderList);
+  document.getElementById('showErrorsBtn').onclick = () => { renderList.onlyErrors = true; renderList(); };
+  document.getElementById('showAllBtn').onclick = () => { renderList.onlyErrors = false; renderList(); };
+  document.getElementById('flashNext').onclick = flashPick;
+  document.getElementById('flashReveal').onclick = flashReveal;
+  document.getElementById('flashSpeak').onclick = () => speakKanji(flashCurrent);
+  document.getElementById('flashGood').onclick = () => markFlash('good');
+  document.getElementById('flashAlmost').onclick = () => markFlash('almost');
+  document.getElementById('flashBad').onclick = () => markFlash('bad');
+  document.getElementById('testVoiceBtn').onclick = () => {
+    const item = currentItem() || flashCurrent || DATA[0];
+    speakKanji(item, true);
+  };
+  document.getElementById('audioEnabled').addEventListener('change', updateAudioSetting);
+  document.addEventListener('keydown', (e) => {
+    if (document.getElementById('view-practice').classList.contains('active')) {
+      if (['1','2','3','4'].includes(e.key) && session && !session.answered) answer(parseInt(e.key, 10) - 1);
+      if (e.key === 'Enter' && session && session.answered) { session.index += 1; nextQuestion(); }
+    }
+    if (document.getElementById('view-flash').classList.contains('active') && e.code === 'Space') {
+      e.preventDefault();
+      flashReveal();
+    }
+  });
+}
+
+async function init() {
+  db = await openDB();
+  if ('speechSynthesis' in window) {
+    loadVoices();
+    updateVoiceStatus();
+    if ('onvoiceschanged' in window.speechSynthesis) {
+      window.speechSynthesis.onvoiceschanged = () => {
+        loadVoices();
+        updateVoiceStatus();
+      };
+    }
+  }
+  const savedState = await dbGet(STATE_KEY);
+  state = savedState ? { ...structuredClone(DEFAULT_STATE), ...savedState, settings: { ...DEFAULT_STATE.settings, ...(savedState.settings || {}) }, history: savedState.history || [], progress: savedState.progress || {} } : structuredClone(DEFAULT_STATE);
+  activeSessionSnapshot = await dbGet(ACTIVE_SESSION_KEY);
+  bind();
+  document.getElementById('audioEnabled').checked = !!state.settings.audioEnabled;
+  updateVoiceStatus();
+  setTimeout(updateVoiceStatus, 400);
+  setTimeout(updateVoiceStatus, 1200);
+  renderStats();
+  renderList();
+  renderHistory();
+  renderContinueButton();
+  updateSessionBarFinished();
+  if (activeSessionSnapshot && activeSessionSnapshot.items?.length && activeSessionSnapshot.index < activeSessionSnapshot.items.length) {
+    document.getElementById('questionBox').innerHTML = `<div class="kanji">↺</div><div class="prompt">Há uma sessão salva. Clique em <b>Continuar sessão anterior</b> para retomar exatamente de onde parou.</div>`;
+    showToast('Sessão anterior encontrada.');
+  }
+}
+
+window.__speakFromList = function(kanji) {
+  const item = ITEM_BY_KANJI[kanji];
+  speakKanji(item);
+};
+
+init();
+</script>
+</body>
+</html>
